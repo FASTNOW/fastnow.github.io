@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=yes">
+<meta name="description" content="QR‑Transfer 离线二维码文件传输工具，支持文件分片、多帧扫码传输、自动合并重组，无需联网即可传输文本与各类文件。">
+<meta name="keywords" content="二维码传输,离线文件传输,多帧扫码传输,QR分片传输,无网络传文件">
+<title>QR Transfer | 基于二维码的传输工具</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f2f5;font-family:system-ui,-apple-system,sans-serif;padding:16px;color:#1e293b}
+.container{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.04);padding:20px;border:1px solid #e9edf2;display:flex;flex-direction:column;gap:14px}
+.card-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eef2f6;padding-bottom:10px}
+.card-header h2{font-size:1.1rem;font-weight:600;display:flex;align-items:center;gap:8px}
+textarea{width:100%;min-height:70px;padding:10px 14px;border:1px solid #dce0e6;border-radius:10px;font-size:0.85rem;font-family:ui-monospace,monospace;background:#fafcff;resize:vertical;outline:none;transition:0.15s;line-height:1.5}
+textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.08)}
+input[type="file"]{display:none}
+.ctrl-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#f8fafc;padding:6px 12px;border-radius:10px;border:1px solid #ecf1f7}
+.ctrl-row label{font-size:0.75rem;font-weight:500;color:#475569;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ctrl-row input[type="range"]{width:80px;accent-color:#2563eb}
+.ctrl-row select{padding:3px 6px;border-radius:6px;border:1px solid #d1d9e6;background:#fff;font-size:0.75rem;outline:none}
+.ctrl-row .val{font-size:0.7rem;color:#2563eb;font-weight:600;min-width:28px}
+.ctrl-row input[type="number"]{width:60px;padding:2px 4px;border-radius:6px;border:1px solid #d1d9e6;font-size:0.75rem;text-align:center}
+.btn-group{display:flex;flex-wrap:wrap;gap:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:6px 14px;border-radius:8px;font-size:0.8rem;font-weight:500;cursor:pointer;border:1px solid transparent;transition:0.12s;gap:5px;background:#f1f4f9;color:#1e293b}
+.btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}
+.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:#16a34a;color:#fff;border-color:#16a34a}
+.btn-success:hover{background:#15803d}
+.btn-danger{background:#dc2626;color:#fff;border-color:#dc2626}
+.btn-danger:hover{background:#b91c1c}
+.btn-secondary{background:#f1f4f9;border-color:#dce0e6}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-outline{background:transparent;border-color:#dce0e6}
+.btn-outline:hover{background:#f8fafc}
+.btn-warning{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.btn-warning:hover{background:#d97706}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none}
+.toggle-wrap{display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#475569}
+.toggle-wrap input[type="checkbox"]{width:16px;height:16px;accent-color:#2563eb;cursor:pointer}
+.qr-box{background:#fafcff;border:1px solid #e9edf2;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;min-height:170px;flex-direction:column;gap:4px;position:relative}
+.qr-box canvas{max-width:100%;height:auto;border-radius:6px}
+.placeholder{color:#94a3b8;font-size:0.85rem}
+.qr-badge{font-size:0.6rem;color:#64748b;background:#f1f5f9;padding:1px 12px;border-radius:30px;display:inline-block;margin-top:4px}
+.progress-wrap{width:100%;height:6px;background:#e9edf2;border-radius:12px;overflow:hidden;margin:2px 0}
+.progress-bar{height:100%;background:#2563eb;border-radius:12px;transition:width 0.3s;width:0%}
+.video-wrap{background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:4/3;border:1px solid #1e293b;cursor:pointer}
+video{width:100%;height:100%;object-fit:cover;display:block}
+.video-overlay{position:absolute;bottom:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.video-badge{background:rgba(0,0,0,0.7);color:#e2e8f0;font-size:0.65rem;padding:2px 12px;border-radius:30px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:6px}
+.video-badge i{font-size:0.7rem}
+.preview-box{background:#fafcff;border:1px solid #e9edf2;border-radius:12px;padding:10px 14px;min-height:56px;font-family:ui-monospace,monospace;font-size:0.78rem;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:#0f172a;max-height:130px;overflow-y:auto}
+.missing-list{font-size:0.7rem;color:#b91c1c;background:#fee;padding:4px 8px;border-radius:6px;max-height:60px;overflow-y:auto;border:1px solid #fcc;display:none;white-space:pre-wrap;word-break:break-all}
+.status-indicator{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.status-idle{background:#94a3b8}
+.status-scanning{background:#f59e0b;animation:pulse 1s infinite}
+.status-detected{background:#16a34a}
+.status-error{background:#dc2626}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
+.manual-input-area{display:flex;gap:6px;margin-top:4px}
+.manual-input-area input{flex:1;padding:4px 8px;border:1px solid #dce0e6;border-radius:6px;font-size:0.75rem;font-family:monospace}
+.status-text{margin-left:6px;font-size:0.7rem;color:#64748b}
+h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:10px;color:#0f172a}
+footer{margin-top:24px;font-size:0.8rem;color:#666;text-align:center;border-top:1px solid #e9edf2;padding-top:16px}
+@media (max-width:820px){.container{grid-template-columns:1fr;gap:16px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<h1><i class="fas fa-qrcode" style="color:#0f172a"></i> QR Transfer</h1>
+<div class="container">
+<div class="card">
+<div class="card-header"><h2><i class="fas fa-paper-plane" style="color:#2563eb"></i> 发送端</h2></div>
+<textarea id="inputText" placeholder="输入文本、链接或代码…（长文本自动分片）"></textarea>
+<div class="ctrl-row">
+<label><i class="fas fa-cubes"></i> 分片 <span class="val" id="sliceInfo">0</span></label>
+<label><i class="fas fa-weight-hanging"></i> 单帧容量 <input type="range" id="sliceSizeRange" min="200" max="1200" value="700" step="50"><span class="val" id="sliceSizeVal">700</span>B</label>
+<label><i class="fas fa-expand"></i> 尺寸 <input type="range" id="qrSizeRange" min="200" max="600" value="500" step="10"><span class="val" id="qrSizeVal">500</span>px</label>
+<label><i class="fas fa-clock"></i> 间隔 <input type="range" id="playSpeed" min="500" max="4000" value="1200" step="100"><span class="val" id="speedVal">1200</span>ms</label>
+<label class="toggle-wrap"><input type="checkbox" id="loopMode" checked> <i class="fas fa-sync-alt"></i> 循环</label>
+<label><i class="fas fa-shield-alt"></i> 纠错 <select id="eccLevel"><option value="L">L</option><option value="M" selected>M</option><option value="Q">Q</option><option value="H">H</option></select></label>
+</div>
+<div class="btn-group">
+<label class="btn btn-secondary" for="fileInput"><i class="fas fa-file"></i> 选择文件</label>
+<input type="file" id="fileInput">
+<button class="btn btn-primary" id="playBtn"><i class="fas fa-play"></i> 播放</button>
+<button class="btn btn-secondary" id="prevBtn"><i class="fas fa-step-backward"></i></button>
+<button class="btn btn-secondary" id="nextBtn"><i class="fas fa-step-forward"></i></button>
+<button class="btn btn-outline" id="resetBtn"><i class="fas fa-undo-alt"></i> 重置</button>
+<button class="btn btn-outline" id="downloadQrBtn" disabled><i class="fas fa-download"></i> 二维码</button>
+<button class="btn btn-secondary" id="testQrBtn"><i class="fas fa-vial"></i> 测试</button>
+</div>
+<div class="ctrl-row">
+<label><i class="fas fa-arrow-right"></i> 跳转到: <input type="number" id="jumpInput" min="1" value="1" style="width:55px;"> 片</label>
+<button class="btn btn-secondary" id="jumpBtn"><i class="fas fa-forward"></i> 跳转</button>
+<span class="status-text" id="sendStatus">就绪</span>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="sendProgress" style="width:0%"></div></div>
+<div class="qr-box" id="qrContainer"><span class="placeholder"><i class="fas fa-qrcode"></i> 输入内容或选择文件后播放</span><span class="qr-badge" id="qrBadge"></span></div>
+</div>
+<div class="card">
+<div class="card-header"><h2><i class="fas fa-qrcode" style="color:#16a34a"></i> 接收端</h2></div>
+<div class="video-wrap" id="videoWrap">
+<video id="video" autoplay playsinline muted></video>
+<div class="video-overlay">
+<div class="video-badge" id="scanBadge"><span class="status-indicator status-idle" id="scanIndicator"></span><span id="scanStatus">待机</span></div>
+<div class="video-badge"><i class="fas fa-camera"></i> 点击拍照解码</div>
+</div>
+</div>
+<div class="ctrl-row">
+<label><i class="fas fa-tachometer-alt"></i> 帧率 <input type="range" id="scanRange" min="50" max="600" value="150" step="50"><span class="val" id="scanVal">150</span>ms</label>
+<label><i class="fas fa-check-circle"></i> 已收 <span class="val" id="recvCount">0</span></label>
+<label class="toggle-wrap"><input type="checkbox" id="autoDownload" checked> <i class="fas fa-download"></i> 自动下载</label>
+<label><i class="fas fa-lightbulb"></i> <button class="btn btn-secondary" id="flashBtn" style="padding:2px 8px;font-size:0.7rem"><i class="fas fa-bolt"></i> 闪光灯</button></label>
+</div>
+<div class="btn-group">
+<button class="btn btn-success" id="startScanBtn"><i class="fas fa-play"></i> 启动摄像头</button>
+<button class="btn btn-danger" id="stopScanBtn" disabled><i class="fas fa-stop"></i> 停止</button>
+<button class="btn btn-secondary" id="switchCamBtn"><i class="fas fa-sync-alt"></i> 切换</button>
+<button class="btn btn-outline" id="copyRecvBtn"><i class="fas fa-copy"></i> 复制</button>
+<button class="btn btn-outline" id="clearRecvBtn"><i class="fas fa-trash-alt"></i> 清空</button>
+<button class="btn btn-warning" id="downloadRecvBtn" disabled><i class="fas fa-file-download"></i> 下载文件</button>
+</div>
+<div class="manual-input-area">
+<input type="text" id="manualInput" placeholder="手动粘贴二维码内容（分片文本）" />
+<button class="btn btn-secondary" id="manualParseBtn"><i class="fas fa-arrow-right"></i> 手动解析</button>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="recvProgress" style="width:0%"></div></div>
+<div class="preview-box" id="recvText">等待扫码…</div>
+<div class="missing-list" id="missingList"></div>
+</div>
+</div>
+<footer>&copy; <script>document.write(new Date().getFullYear())</script> FastNow Studio | BSD 3-Clause</footer>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+(function(){
+const iT=document.getElementById('inputText'),fI=document.getElementById('fileInput'),gB=document.getElementById('playBtn'),pB=document.getElementById('prevBtn'),nB=document.getElementById('nextBtn'),rB=document.getElementById('resetBtn'),qC=document.getElementById('qrContainer'),sL=document.getElementById('sendStatus'),v=document.getElementById('video'),stB=document.getElementById('startScanBtn'),spB=document.getElementById('stopScanBtn'),swB=document.getElementById('switchCamBtn'),cpB=document.getElementById('copyRecvBtn'),crB=document.getElementById('clearRecvBtn'),rT=document.getElementById('recvText'),stS=document.getElementById('scanStatus'),ps=document.getElementById('playSpeed'),sv=document.getElementById('speedVal'),sr=document.getElementById('scanRange'),sva=document.getElementById('scanVal'),el=document.getElementById('eccLevel'),sp=document.getElementById('sendProgress'),rp=document.getElementById('recvProgress'),si=document.getElementById('sliceInfo'),rc=document.getElementById('recvCount'),dQ=document.getElementById('downloadQrBtn'),dR=document.getElementById('downloadRecvBtn'),lm=document.getElementById('loopMode'),ad=document.getElementById('autoDownload'),qb=document.getElementById('qrBadge'),ssr=document.getElementById('sliceSizeRange'),ssv=document.getElementById('sliceSizeVal'),qrSr=document.getElementById('qrSizeRange'),qrSv=document.getElementById('qrSizeVal'),jumpInp=document.getElementById('jumpInput'),jumpBtn=document.getElementById('jumpBtn'),missingList=document.getElementById('missingList'),scanIndicator=document.getElementById('scanIndicator'),manualInput=document.getElementById('manualInput'),manualParseBtn=document.getElementById('manualParseBtn'),testQrBtn=document.getElementById('testQrBtn'),scanBadge=document.getElementById('scanBadge'),videoWrap=document.getElementById('videoWrap'),flashBtn=document.getElementById('flashBtn');
+let stream=null,scanTimer=null,scanning=false,lastDec='',facing='environment',scanDelay=150,playDelay=1200;
+let slices=[],curSlice=0,isPlaying=false,playTimer=null;
+let recvSlices={},recvTotal=0,recvData={},recvFileName='',recvIsFile=false,recvComplete=false;
+let currentContent=null,isFileMode=false,fileName='',fileSize=0;
+let sliceSize=700, qrSize=500;
+let scanFrameCount=0, noDecodeCount=0;
+let flashEnabled=false, track=null;
+
+function setScanStatus(text, type){
+stS.textContent=text;
+scanIndicator.className='status-indicator';
+if(type==='idle') scanIndicator.classList.add('status-idle');
+else if(type==='scanning') scanIndicator.classList.add('status-scanning');
+else if(type==='detected') scanIndicator.classList.add('status-detected');
+else if(type==='error') scanIndicator.classList.add('status-error');
+}
+
+ssr.addEventListener('input',()=>{ssv.textContent=ssr.value;sliceSize=parseInt(ssr.value);if(currentContent!==null)prepareContent(currentContent,isFileMode,fileName,fileSize);});
+qrSr.addEventListener('input',()=>{qrSv.textContent=qrSr.value;qrSize=parseInt(qrSr.value);if(slices.length)renderQR(slices[curSlice]);});
+ps.addEventListener('input',()=>{sv.textContent=ps.value;playDelay=parseInt(ps.value);if(isPlaying){clearInterval(playTimer);playTimer=setInterval(nextSlice,playDelay);}});
+sr.addEventListener('input',()=>{sva.textContent=sr.value;scanDelay=parseInt(sr.value);if(scanning){clearInterval(scanTimer);scanTimer=setInterval(scanF,scanDelay);}});
+
+function base64ToArrayBuffer(b64){const s=atob(b64),buf=new Uint8Array(s.length);for(let i=0;i<s.length;i++)buf[i]=s.charCodeAt(i);return buf.buffer}
+function arrayBufferToBase64(buf){const u8=new Uint8Array(buf);let s='';for(let i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);return btoa(s)}
+function utf8ToBase64(str){return btoa(unescape(encodeURIComponent(str)))}
+function base64ToUtf8(b64){return decodeURIComponent(escape(atob(b64)))}
+
+function buildSlices(content,isFile,fname){
+const b64=isFile?arrayBufferToBase64(content):utf8ToBase64(content);
+const total=Math.ceil(b64.length/sliceSize);const arr=[];
+for(let i=0;i<total;i++){const part=b64.slice(i*sliceSize,Math.min((i+1)*sliceSize,b64.length));const fnameB64=isFile?btoa(fname):'';const proto=isFile?`F|${total}|${i}|${fnameB64}|${part}`:`T|${total}|${i}|${part}`;arr.push(proto);}
+return arr;
+}
+
+function renderQR(content){
+qC.innerHTML='';if(!content){qC.innerHTML='<span class="placeholder"><i class="fas fa-qrcode"></i> 无内容</span>';qb.textContent='';dQ.disabled=true;return;}
+const c=document.createElement('canvas');const ecc=el.value;
+QRCode.toCanvas(c,content,{width:qrSize,margin:1,color:{dark:'#0f172a',light:'#fff'},errorCorrectionLevel:ecc},(e)=>{
+if(e){qC.innerHTML='<span class="placeholder" style="color:#b91c1c;"><i class="fas fa-exclamation-triangle"></i> 生成失败: '+e.message+'</span>';qb.textContent='失败';dQ.disabled=true;return;}
+qC.appendChild(c);dQ.disabled=false;qb.textContent=(slices.length>1)?'分片 '+(curSlice+1)+'/'+slices.length:'单帧';
+});
+}
+
+function updateSendProgress(){const t=slices.length;const p=t?((curSlice+1)/t*100):0;sp.style.width=p+'%';si.textContent=t?(curSlice+1)+'/'+t:'0';}
+
+function nextSlice(){if(!slices.length)return;if(!lm.checked&&curSlice===slices.length-1){stopPlay();return;}curSlice=(curSlice+1)%slices.length;renderQR(slices[curSlice]);updateSendProgress();sL.textContent='发送 '+(curSlice+1)+'/'+slices.length;}
+function prevSlice(){if(!slices.length)return;curSlice=(curSlice-1+slices.length)%slices.length;renderQR(slices[curSlice]);updateSendProgress();sL.textContent='上一帧 '+(curSlice+1)+'/'+slices.length;}
+
+function startPlay(){if(!slices.length){sL.textContent='无内容';return;}isPlaying=true;gB.innerHTML='<i class="fas fa-pause"></i> 暂停';clearInterval(playTimer);playTimer=setInterval(nextSlice,playDelay);sL.textContent='播放中 '+slices.length+' 片';}
+function stopPlay(){isPlaying=false;gB.innerHTML='<i class="fas fa-play"></i> 播放';clearInterval(playTimer);sL.textContent='已暂停';}
+function togglePlay(){isPlaying?stopPlay():startPlay();}
+
+function resetSender(){stopPlay();slices=[];curSlice=0;sp.style.width='0%';si.textContent='0';qC.innerHTML='<span class="placeholder"><i class="fas fa-qrcode"></i> 输入内容或选择文件后播放</span>';qb.textContent='';dQ.disabled=true;sL.textContent='已重置';recvSlices={};recvTotal=0;recvData={};recvFileName='';recvIsFile=false;recvComplete=false;rp.style.width='0%';rc.textContent='0';dR.disabled=true;rT.textContent='等待扫码…';missingList.style.display='none';missingList.textContent='';}
+
+function prepareContent(content,isFile,fname,fsize){
+resetSender();
+currentContent=content;isFileMode=isFile;fileName=fname||'file';fileSize=fsize||0;
+const arr=buildSlices(content,isFile,fileName);slices=arr;curSlice=0;
+if(arr.length>0){renderQR(arr[0]);updateSendProgress();sL.textContent='已分片 '+arr.length+' 片 (单帧'+sliceSize+'B) '+(isFile?'文件 '+fileName:'');if(arr.length>1){startPlay();}else{isPlaying=false;gB.innerHTML='<i class="fas fa-play"></i> 播放';}}else{sL.textContent='内容为空';}
+}
+
+iT.addEventListener('input',function(){const t=this.value.trim();if(!t){resetSender();return;}prepareContent(t,false,'',0);});
+
+fI.addEventListener('change',(e)=>{
+const f=e.target.files[0];if(!f){sL.textContent='未选择文件';return;}
+sL.textContent='读取中...';
+const r=new FileReader();
+r.onload=(ev)=>{
+try{
+const buf=ev.target.result;
+prepareContent(buf,true,f.name,f.size);
+sL.textContent='文件 '+f.name+' ('+(f.size/1024).toFixed(1)+'KB) → '+slices.length+'片 (单帧'+sliceSize+'B)';
+}catch(err){sL.textContent='处理失败: '+err.message;}
+};
+r.onerror=()=>{sL.textContent='文件读取失败';};
+r.readAsArrayBuffer(f);
+fI.value='';
+});
+
+gB.addEventListener('click',togglePlay);
+pB.addEventListener('click',()=>{if(isPlaying)stopPlay();prevSlice();});
+nB.addEventListener('click',()=>{if(isPlaying)stopPlay();nextSlice();});
+rB.addEventListener('click',resetSender);
+
+jumpBtn.addEventListener('click',()=>{
+if(!slices.length)return;
+let idx=parseInt(jumpInp.value)-1;
+if(isNaN(idx)||idx<0)idx=0;
+if(idx>=slices.length)idx=slices.length-1;
+curSlice=idx;renderQR(slices[curSlice]);updateSendProgress();sL.textContent='跳转至 '+(curSlice+1)+'/'+slices.length;
+if(isPlaying){stopPlay();}
+});
+
+dQ.addEventListener('click',()=>{const c=qC.querySelector('canvas');if(!c)return;const a=document.createElement('a');a.download='qrcode.png';a.href=c.toDataURL();a.click();});
+
+testQrBtn.addEventListener('click',()=>{
+const testText='TEST|1|0|hello';
+iT.value=testText;
+prepareContent(testText,false,'',0);
+});
+
+videoWrap.addEventListener('click', function(e){
+if(!scanning) return;
+try{
+const c=document.createElement('canvas');
+c.width=v.videoWidth; c.height=v.videoHeight;
+const ctx=c.getContext('2d');
+ctx.drawImage(v,0,0);
+const d=ctx.getImageData(0,0,c.width,c.height);
+const code=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});
+if(code && code.data){
+parseSlice(code.data);
+setScanStatus('拍照识别','detected');
+setTimeout(()=>{if(scanning)setScanStatus('扫描中','scanning');}, 600);
+}else{
+setScanStatus('未识别','error');
+setTimeout(()=>{if(scanning)setScanStatus('扫描中','scanning');}, 600);
+}
+}catch(e){}
+});
+
+flashBtn.addEventListener('click', function(){
+if(!track) return;
+const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+if(!capabilities.torch) {
+alert('当前设备不支持闪光灯');
+return;
+}
+flashEnabled = !flashEnabled;
+track.applyConstraints({advanced:[{torch: flashEnabled}]}).catch(()=>{
+alert('闪光灯切换失败');
+flashEnabled = !flashEnabled;
+});
+});
+
+async function startCam(){
+try{
+if(stream)stopCam();
+stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:640},height:{ideal:480}}});
+v.srcObject=stream;
+await v.play();
+await new Promise((resolve)=>{
+const check=()=>{
+if(v.videoWidth>0 && v.videoHeight>0)resolve();
+else requestAnimationFrame(check);
+};
+check();
+});
+if(stream.getVideoTracks().length>0){
+track=stream.getVideoTracks()[0];
+}
+stB.disabled=true;spB.disabled=false;scanning=true;
+setScanStatus('扫描中','scanning');
+if(scanTimer)clearInterval(scanTimer);
+scanTimer=setInterval(scanF,scanDelay);
+}catch(e){
+setScanStatus('错误','error');
+}
+}
+function stopCam(){
+scanning=false;clearInterval(scanTimer);scanTimer=null;
+if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;track=null;}
+v.srcObject=null;
+stB.disabled=false;spB.disabled=true;
+setScanStatus('待机','idle');
+flashEnabled=false;
+}
+function scanF(){
+if(!scanning || v.readyState!==v.HAVE_ENOUGH_DATA || !v.videoWidth) return;
+scanFrameCount++;
+try{
+const c=document.createElement('canvas');
+c.width=v.videoWidth; c.height=v.videoHeight;
+const ctx=c.getContext('2d');
+ctx.drawImage(v,0,0);
+const d=ctx.getImageData(0,0,c.width,c.height);
+const code=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});
+if(code && code.data){
+noDecodeCount=0;
+if(code.data!==lastDec){
+lastDec=code.data;
+parseSlice(code.data);
+setScanStatus('已识别','detected');
+setTimeout(()=>{if(scanning)setScanStatus('扫描中','scanning');}, 600);
+}
+}else{
+noDecodeCount++;
+if(noDecodeCount>30){
+setScanStatus('调整距离/光线','error');
+noDecodeCount=0;
+setTimeout(()=>{if(scanning)setScanStatus('扫描中','scanning');}, 2000);
+}
+}
+}catch(e){}
+}
+function parseSlice(raw){
+try{
+const parts=raw.split('|'); if(parts.length<3)return;
+const type=parts[0]; const total=parseInt(parts[1]); const idx=parseInt(parts[2]);
+if(isNaN(total)||isNaN(idx)||idx<0||idx>=total)return;
+if(total!==recvTotal){
+recvTotal=total; recvSlices={}; recvData={}; recvFileName=''; recvIsFile=false; recvComplete=false;
+rp.style.width='0%'; rc.textContent='0'; dR.disabled=true; rT.textContent='接收中…';
+missingList.style.display='none';
+}
+if(recvSlices[idx])return;
+recvSlices[idx]=true;
+let data=''; let fname='';
+if(type==='F' && parts.length>=5){ fname=parts[3]; data=parts.slice(4).join('|'); recvIsFile=true; recvFileName=atob(fname); }
+else if(type==='T' && parts.length>=4){ data=parts.slice(3).join('|'); recvIsFile=false; }
+else return;
+recvData[idx]=data;
+const count=Object.keys(recvSlices).length;
+rc.textContent=count;
+const p=Math.min(100,(count/total)*100);
+rp.style.width=p+'%';
+const missing=[];
+for(let i=0;i<total;i++){ if(!recvSlices[i]) missing.push(i+1); }
+if(missing.length>0){ missingList.style.display='block'; missingList.textContent='缺失分片: '+missing.join(', '); }
+else { missingList.style.display='none'; }
+if(count===total){ recvComplete=true; reassemble(); }
+}catch(e){}
+}
+function reassemble(){
+try{
+const keys=Object.keys(recvSlices).map(Number).sort((a,b)=>a-b);
+let fullB64=''; for(const k of keys){ fullB64+=recvData[k]; }
+if(recvIsFile){
+const buf=base64ToArrayBuffer(fullB64);
+const blob=new Blob([buf]);
+const url=URL.createObjectURL(blob);
+rT.textContent='文件: '+recvFileName+' ('+(blob.size/1024).toFixed(1)+'KB)';
+dR.disabled=false;
+setScanStatus('完成','detected');
+if(ad.checked){
+const link=document.createElement('a');
+link.href=url; link.download=recvFileName||'received_file';
+document.body.appendChild(link); link.click(); document.body.removeChild(link);
+setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+}else{
+const text=base64ToUtf8(fullB64);
+rT.textContent=text;
+setScanStatus('完成','detected');
+}
+missingList.style.display='none';
+}catch(e){ rT.textContent='重组失败: '+e.message; }
+}
+manualParseBtn.addEventListener('click',()=>{
+const raw=manualInput.value.trim();
+if(!raw) return;
+parseSlice(raw);
+manualInput.value='';
+});
+stB.addEventListener('click',startCam);
+spB.addEventListener('click',stopCam);
+swB.addEventListener('click',()=>{
+facing=(facing==='environment'?'user':'environment');
+if(stream) startCam();
+else { setScanStatus('已切换','idle'); }
+});
+cpB.addEventListener('click',()=>{
+const t=rT.textContent;
+if(t && !t.startsWith('等待') && !t.startsWith('接收中') && !t.startsWith('重组失败')){
+navigator.clipboard.writeText(t).then(()=>{}).catch(()=>{});
+}
+});
+crB.addEventListener('click',()=>{
+rT.textContent='等待扫码…';
+recvSlices={}; recvTotal=0; recvData={}; recvFileName=''; recvIsFile=false; recvComplete=false;
+rp.style.width='0%'; rc.textContent='0'; dR.disabled=true;
+missingList.style.display='none'; missingList.textContent='';
+});
+dR.addEventListener('click',()=>{
+if(recvComplete && recvIsFile){
+const keys=Object.keys(recvSlices).map(Number).sort((a,b)=>a-b);
+let fullB64=''; for(const k of keys){ fullB64+=recvData[k]; }
+const buf=base64ToArrayBuffer(fullB64);
+const blob=new Blob([buf]);
+const url=URL.createObjectURL(blob);
+const link=document.createElement('a');
+link.href=url; link.download=recvFileName||'received_file';
+document.body.appendChild(link); link.click(); document.body.removeChild(link);
+setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+});
+window.addEventListener('beforeunload',()=>{clearInterval(scanTimer);clearInterval(playTimer);if(stream)stream.getTracks().forEach(t=>t.stop());});
+setScanStatus('待机','idle');
+})();
+</script>
+</body>
+</html>-
