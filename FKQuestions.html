@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FKQuestions · AI辅助问卷填写工具 | 油猴脚本</title>
+  <meta name="description" content="FKQuestions 是一款AI辅助问卷填写的用户脚本，支持自动识别单选、多选、填空等10+种题型，调用OpenAI/DeepSeek等生成答案，拟人化逐字输入，自动翻页提交">
+  <meta name="keywords" content="问卷辅助,AI填问卷,油猴脚本,Tampermonkey,自动填写,问卷星,腾讯问卷,AI生成答案">
+  <link rel="canonical" href="https://github.com/fastnow/UserJs">
+  <meta property="og:title" content="FKQuestions · AI辅助问卷填写工具">
+  <meta property="og:description" content="自动识别问卷题目，调用AI生成自然答案，拟人化逐字输入，自动翻页提交，支持多平台问卷">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index, follow">
+  <style>
+    body {
+      max-width: 820px;
+      margin: 2rem auto;
+      padding: 0 1.2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #111;
+      background: #fff;
+    }
+    h1 { font-size: 2rem; font-weight: 500; margin-bottom: 0.2rem; }
+    .subhead { font-size: 1.1rem; color: #333; margin-top: -0.2rem; }
+    h2 { font-size: 1.4rem; margin-top: 2.2rem; font-weight: 500; border-bottom: 1px solid #ccc; padding-bottom: 0.2rem; }
+    h3 { font-size: 1.1rem; font-weight: 500; margin-top: 1.4rem; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+    ul, ol { padding-left: 1.2rem; }
+    code {
+      background: #f3f4f6;
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 0.8rem;
+      overflow: auto;
+      font-size: 0.85rem;
+      border-radius: 4px;
+    }
+    .install-btn {
+      display: inline-block;
+      background: #28a745;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 0.5rem 2rem;
+      border-radius: 4px;
+      text-decoration: none;
+      border: 1px solid #28a745;
+    }
+    .install-btn:hover {
+      background: #218838;
+      border-color: #1e7e34;
+    }
+    .tip-box {
+      background: #f0f7ff;
+      padding: 0.8rem 1rem;
+      border-left: 4px solid #0366d6;
+      margin: 1.5rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .warning-box {
+      background: #fff5f5;
+      padding: 0.8rem 1.2rem;
+      border-left: 4px solid #dc3545;
+      margin: 1.5rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem 1.5rem;
+      margin: 0.8rem 0 0.8rem 0.4rem;
+    }
+    .feature-grid li {
+      list-style: none;
+      position: relative;
+      padding-left: 1.2rem;
+    }
+    .feature-grid li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: #28a745;
+    }
+    .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem; }
+    .faq dt { font-weight: 500; margin-top: 0.8rem; }
+    .faq dd { margin-left: 1rem; color: #333; }
+    .config-sect { background: #fafbfc; padding: 0.8rem 1.2rem; border-radius: 8px; border: 1px solid #e9ecf0; margin: 0.5rem 0; }
+    @media (max-width: 600px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>FKQuestions</h1>
+<p class="subhead">问卷辅助 · AI 自动填写</p>
+<p>
+  <span style="background: #e4e7eb; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">油猴脚本</span>
+  <span style="background: #e4e7eb; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">AI 辅助</span>
+  <span style="background: #e4e7eb; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">跨页续填</span>
+  <span style="background: #e4e7eb; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">拟人输入</span>
+</p>
+
+<div class="tip-box">
+  自动识别问卷题目 → 调用 AI 生成自然答案 → 逐字填写 → 自动翻页，全程像真人操作
+</div>
+
+<div style="text-align: center; margin: 2rem 0;">
+  <a href="https://fastly.jsdelivr.net/gh/fastnow/UserJs@main/FKQuestions.user.js" class="install-btn">安装 FKQuestions</a>
+  <p style="margin-top: 0.4rem; color: #666; font-size: 0.9rem;">
+    需要 Tampermonkey 或 Violentmonkey
+  </p>
+</div>
+
+<hr>
+
+<h2>功能特性</h2>
+<ul class="feature-grid">
+  <li><strong>题目提取</strong> – 单选、多选、填空、下拉、日期、滑块、取色器、文件上传、富文本等 10+ 种题型，自动屏蔽页面噪声</li>
+  <li><strong>AI 生成答案</strong> – 支持 OpenAI / DeepSeek / 智谱 / Claude / Gemini / 自定义端点，可设人设和自定义提示词</li>
+  <li><strong>拟人输入</strong> – 逐字键入，随机间隔、卡壳、思考，速度可调（关闭/快/正常/慢）</li>
+  <li><strong>反作弊扫描</strong> – 只读检测验证码、蜜罐、陷阱题、风控 SDK、行为监听，风险高时自动降级为“仅建议”</li>
+  <li><strong>跨页续填</strong> – 支持整页跳转、SPA（pushState）和纯 AJAX 换页，自动点“下一页”直到提交</li>
+  <li><strong>独立答案窗</strong> – 可拖拽、收起，逐题复制或一键复制全部答案</li>
+  <li><strong>执行日志</strong> – 记录提取、AI 请求、填写过程，仅内存存储，不落盘</li>
+  <li><strong>配置导入/导出</strong> – 迁移设置（含 Key）只需一次导出导入</li>
+  <li><strong>快捷键</strong> – <code>Alt+Q</code> 开关面板，<code>Alt+W</code> 执行，<code>Alt+E</code> 预览题目</li>
+</ul>
+
+<h2>安装与使用</h2>
+<ol>
+  <li>安装浏览器扩展 <a href="https://www.tampermonkey.net/">Tampermonkey</a> 或 Violentmonkey</li>
+  <li>点击上方的 <strong>安装 FKQuestions</strong>，油猴会自动弹出安装界面，点“安装”即可</li>
+  <li>打开问卷页面（推荐先试 <code>*.wjx.cn</code>、<code>wj.qq.com</code>）</li>
+  <li>右下角出现齿轮图标，单击打开面板，在 <strong>AI</strong> 页填入 API Key</li>
+  <li>在 <strong>填写</strong> 页选模式：
+    <ul>
+      <li><strong>全自动</strong> – 直接填，不确认</li>
+      <li><strong>半自动</strong> – 预览后确认再填（推荐）</li>
+      <li><strong>仅建议</strong> – 只显示答案，不碰页面</li>
+    </ul>
+  </li>
+  <li>点 <strong>执行</strong> 开始若开启 <strong>跨页</strong>，会自动翻页直到结束</li>
+  <li>若开启“自动提交”且无风险，3 秒后自动点提交按钮</li>
+</ol>
+
+<h2>配置项</h2>
+<div class="config-sect">
+  <ul style="margin: 0.2rem 0;">
+    <li><strong>执行模式</strong> – 全自动/半自动/仅建议</li>
+    <li><strong>自动提交</strong> – 受反作弊等级限制</li>
+    <li><strong>打字速度</strong> – 关闭/快速/正常/慢速</li>
+    <li><strong>人设</strong> – 学生/白领/设计师/教师/程序员/普通用户 + 自定义提示词</li>
+    <li><strong>答案约束</strong> – 多选最少/最多项，填空最大字数</li>
+    <li><strong>反作弊敏感度</strong> – 宽松/标准/严格</li>
+    <li><strong>媒体检测</strong> – 可关闭，避免图标密集页面误降级</li>
+    <li><strong>站点白名单</strong> – 强烈建议填写</li>
+    <li><strong>额外排除选择器</strong> – 自定义 CSS 排除非题目区域</li>
+  </ul>
+</div>
+
+<h2>风险与注意事项</h2>
+<div class="warning-box">
+  <ul style="margin: 0.2rem 0; padding-left: 1.2rem; list-style: none;">
+    <li><strong>全域匹配</strong> – 默认在所有网页生效，请务必在“设置”页填写白名单（如 <code>wjx.cn, wj.qq.com</code>），否则可能在网银/后台误操作</li>
+    <li><strong>API Key 明文存储</strong> – 勾选“保存到本地”后 Key 会明文写入扩展存储，共用电脑勿勾</li>
+    <li><strong>可能违反平台 ToS</strong> – 自动化填写可能被封号，风险自担</li>
+    <li><strong>自定义端点</strong> – 请确保地址可信，防止 Key 泄露</li>
+  </ul>
+</div>
+
+<h2>常见问题</h2>
+<dl class="faq">
+  <dt>提取不到题目？</dt>
+  <dd>点“预览提取到的题目”看结果若缺失，调整“额外排除选择器”或关闭页面的混淆开关也可开调试模式看控制台日志</dd>
+  <dt>AI 总返回“暂无”？</dt>
+  <dd>脚本已拦截占位符，但模型太弱（如 glm-4-flash）时请换更强模型（如 gpt-4o-mini）或调低 temperature 到 0.2~0.3</dd>
+  <dt>跨页不继续？</dt>
+  <dd>检查“跨页”是否开启，且“自动点击下一页”打开若框架特殊，可手动点一下“下一页”，脚本会接管</dd>
+  <dt>速度怎么调？</dt>
+  <dd>在“填写”页下拉选档位，或展开“详细速度参数”微调（基础耗时、递减系数、抖动等）</dd>
+  <dt>会收集个人信息吗？</dt>
+  <dd>不会只与您配置的 AI 服务商通信，日志仅存内存，不落盘</dd>
+</dl>
+
+<h2>更新记录</h2>
+<ul>
+  <li><strong>v1.0</strong> (2026-08-31) – 首个正式版：全题型支持、RectCache 性能优化、内容指纹检测（纯 AJAX 换页）、独立答案窗、配置导入导出、人设系统、交互修复</li>
+</ul>
+
+<div class="footer">
+  <p>&copy; <script>document.write(new Date().getFullYear())</script> FastNow Studio | BSD 3-Clause<br><a href="https://github.com/fastnow/UserJs">GitHub 仓库</a></p>
+</div>
+
+</body>
+</html>

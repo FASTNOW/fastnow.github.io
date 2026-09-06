@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteAssetDL · 页面资源嗅探与批量下载工具 | 油猴脚本</title>
+  <meta name="description" content="SiteAssetDL 是一款用户脚本，可嗅探网页中的图片、视频、音频、字体、字幕等资源，支持深度扫描懒加载、并发下载、流式ZIP打包，适用于Chrome/Firefox/Edge">
+  <meta name="keywords" content="资源嗅探,批量下载,油猴脚本,Tampermonkey,图片下载,视频下载,ZIP打包,懒加载扫描">
+  <link rel="canonical" href="https://github.com/fastnow/UserJs">
+  <meta property="og:title" content="SiteAssetDL · 页面资源嗅探与批量下载工具">
+  <meta property="og:description" content="一键嗅探并下载网页中的图片、视频、音频、字体、字幕，支持深度扫描、并发下载与ZIP打包">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index, follow">
+  <style>
+    body {
+      max-width: 880px;
+      margin: 2rem auto;
+      padding: 0 1.2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #111;
+      background: #fff;
+    }
+    h1 { font-size: 2.2rem; font-weight: 500; margin-bottom: 0.2rem; }
+    .subhead { font-size: 1.1rem; color: #333; margin-top: -0.2rem; }
+    h2 { font-size: 1.5rem; margin-top: 2.4rem; font-weight: 500; border-bottom: 1px solid #ccc; padding-bottom: 0.2rem; }
+    h3 { font-size: 1.1rem; font-weight: 500; margin-top: 1.6rem; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+    ul, ol { padding-left: 1.2rem; }
+    code {
+      background: #f3f4f6;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 0.8rem 1rem;
+      overflow: auto;
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
+    .badge-group span {
+      background: #e4e7eb;
+      padding: 0.1rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-right: 0.3rem;
+      display: inline-block;
+      margin-bottom: 0.2rem;
+    }
+    .install-btn {
+      display: inline-block;
+      background: #1a7f37;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 0.55rem 2.4rem;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid #1a7f37;
+      transition: background 0.15s;
+    }
+    .install-btn:hover {
+      background: #146c2f;
+      border-color: #146c2f;
+      text-decoration: none;
+    }
+    .tip-box {
+      background: #f0f7ff;
+      padding: 0.8rem 1.2rem;
+      border-left: 4px solid #0366d6;
+      margin: 1.5rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .warning-box {
+      background: #fff5f5;
+      padding: 0.8rem 1.2rem;
+      border-left: 4px solid #dc3545;
+      margin: 1.5rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem 1.5rem;
+      margin: 0.8rem 0 0.8rem 0.4rem;
+    }
+    .feature-grid li {
+      list-style: none;
+      position: relative;
+      padding-left: 1.2rem;
+    }
+    .feature-grid li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: #1a7f37;
+    }
+    .footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem; }
+    .config-sect { background: #fafbfc; padding: 0.8rem 1.2rem; border-radius: 8px; border: 1px solid #e9ecf0; margin: 0.5rem 0; }
+    .faq dt { font-weight: 500; margin-top: 0.8rem; }
+    .faq dd { margin-left: 1rem; color: #333; }
+    @media (max-width: 600px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>SiteAssetDL</h1>
+<p class="subhead">页面资源嗅探 · 批量下载 · 流式打包</p>
+<p>
+  <span class="badge-group">
+    <span>油猴脚本</span>
+    <span>图片/视频/音频/字体/字幕</span>
+    <span>懒加载扫描</span>
+    <span>并发下载</span>
+    <span>ZIP 流式打包</span>
+  </span>
+</p>
+
+<div class="tip-box">
+  <strong>页面资源全嗅探</strong> —— 图片、视频、音频、字体、字幕，甚至 CSS 背景和懒加载内容，一键批量下载或打包为 ZIP
+</div>
+
+<div style="text-align: center; margin: 2.2rem 0;">
+  <a href="https://fastly.jsdelivr.net/gh/fastnow/UserJs@main/SiteAssetDL.user.js" class="install-btn">安装 SiteAssetDL</a>
+  <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+    需要 Tampermonkey 或 Violentmonkey · 支持 Chrome / Firefox / Edge
+  </p>
+</div>
+
+<hr>
+
+<h2>核心功能</h2>
+<ul class="feature-grid">
+  <li><strong>全类型嗅探</strong> – 图片、视频、音频、字体、字幕，自动识别扩展名与 MIME</li>
+  <li><strong>深度扫描</strong> – 强制解冻懒加载、滚动触发图片、CSS 背景、字体、iframe 资源</li>
+  <li><strong>智能去重</strong> – 基于 URL 和尺寸/大小指纹，标记重复项，一键清理</li>
+  <li><strong>并发批量下载</strong> – 可调并发数与重试，失败自动降速，断流重试</li>
+  <li><strong>流式直写 ZIP</strong> – 利用 File System Access API 直接写入磁盘，支持超大文件</li>
+  <li><strong>原生压缩</strong> – 对文本类资源（字幕、CSS、JSON）自动 Deflate 压缩，已压缩格式跳过</li>
+  <li><strong>多格式导出</strong> – URL 列表、aria2 输入、wget/curl 脚本、Markdown、CSV、JSON</li>
+  <li><strong>悬浮面板</strong> – 可拖拽、缩放，适配触摸与桌面，快捷键 <code>Alt+S</code> 开关</li>
+  <li><strong>悬停预览</strong> – 鼠标悬停图片卡片即可预览大图，双击全屏浏览</li>
+  <li><strong>跨页持续</strong> – 监听 pushState / hash 变化，SPA 页面自动重新采集</li>
+</ul>
+
+<h2>安装与使用</h2>
+<ol>
+  <li>安装浏览器扩展 <a href="https://www.tampermonkey.net/">Tampermonkey</a> 或 Violentmonkey</li>
+  <li>点击上方 <strong>安装 SiteAssetDL</strong>，油猴弹出安装界面，点击“安装”</li>
+  <li>打开任意网页（推荐图片/视频站，如 <code>unsplash.com</code>、<code>pixabay.com</code>）</li>
+  <li>右下角出现 <strong>“嗅探”</strong> 悬浮按钮，单击打开面板</li>
+  <li>面板自动展示当前页所有资源，可按类型、大小、域名、懒加载等筛选</li>
+  <li>勾选需要的资源，点击 <strong>“打包 ZIP”</strong> 或 <strong>“逐个下载”</strong> 即可</li>
+</ol>
+
+<div class="tip-box">
+  <strong>深度扫描</strong> 按钮会强制解冻懒加载图片、自动滚动页面，触发更多隐藏资源<br>
+  <strong>存到文件夹</strong> 功能（需浏览器支持 <code>showDirectoryPicker</code>）可流式写入，不占内存
+</div>
+
+<h2>配置项</h2>
+<div class="config-sect">
+  <ul style="margin: 0.2rem 0;">
+    <li><strong>下载并发数</strong> – 默认 6，连续失败自动降速</li>
+    <li><strong>失败重试次数</strong> – 默认 2，对 403/404 等永久错误跳过</li>
+    <li><strong>ZIP 压缩</strong> – 智能（自动压缩文本类）/ 不压缩（最快）/ 全部压缩（最小）</li>
+    <li><strong>分组显示</strong> – 按类型或域名分组，浏览更清晰</li>
+    <li><strong>主题</strong> – 浅色/深色/跟随系统</li>
+    <li><strong>去重忽略参数</strong> – 忽略 URL 查询参数，合并相同资源</li>
+    <li><strong>悬停预览</strong> – 鼠标悬停图片卡片快速预览</li>
+    <li><strong>自动滚动</strong> – 深度扫描时自动滚动触发懒加载</li>
+    <li><strong>追踪无限滚动</strong> – 对无限滚动页面持续加载</li>
+    <li><strong>记住窗口位置</strong> – 面板位置和大小会保存到 GM 存储</li>
+  </ul>
+</div>
+
+<h2>风险与注意事项</h2>
+<div class="warning-box">
+  <ul style="margin: 0.2rem 0; padding-left: 1.2rem;">
+    <li><strong>全域匹配</strong> – 脚本默认在所有网页生效，建议在设置中 <strong>不要</strong> 填写白名单（该脚本无站点限制，但请勿在隐私页面使用）</li>
+    <li><strong>大量下载</strong> – 批量下载数百个文件可能触发浏览器限流或站点反爬，请合理设置并发数</li>
+    <li><strong>跨域资源</strong> – 部分站点可能拒绝跨域请求，此时可尝试“逐个下载”触发浏览器原生下载</li>
+    <li><strong>ZIP 内存</strong> – 打包时所有文件会暂存内存，若资源总大小超过 2GB，建议使用“存到文件夹”或分批下载</li>
+  </ul>
+</div>
+
+<h2>常见问题</h2>
+<dl class="faq">
+  <dt>嗅探不到某些图片/视频？</dt>
+  <dd>尝试点击 <strong>“深度扫描”</strong>，脚本会强制解冻懒加载、滚动页面并扫描 CSS 背景若仍缺失，可手动滚动页面后点击“重新采集”</dd>
+
+  <dt>打包 ZIP 时提示“文件数超过 65535”？</dt>
+  <dd>ZIP 格式限制最多 65535 个文件，请分批选择或使用“存到文件夹”直接写入磁盘</dd>
+
+  <dt>下载大文件时内存占用高？</dt>
+  <dd>使用 <strong>“存到文件夹”</strong> 功能（需浏览器支持 File System Access API），文件会流式写入磁盘，不占用内存</dd>
+
+  <dt>如何导出资源列表？</dt>
+  <dd>在面板底部选择导出格式（txt / aria2 / wget / curl / md / csv / json），点击即可下载文件</dd>
+
+  <dt>能下载 M3U8 或流媒体吗？</dt>
+  <dd>脚本会嗅探 M3U8 / MPD 索引文件，但不会解析切片您可复制 URL 后使用其他工具下载</dd>
+
+  <dt>脚本会收集我的浏览数据吗？</dt>
+  <dd>不会所有数据仅在本地处理，不发送任何外部服务器（除了资源下载请求）</dd>
+</dl>
+
+<h2>更新记录</h2>
+<ul>
+  <li><strong>v1.0.0</strong> (2026-09-06) – 首个稳定版：全类型嗅探、深度扫描、并发下载、流式 ZIP、多格式导出、悬浮面板、主题适配</li>
+  <li>后续计划：支持 WebP/AVIF 批量转换、更智能的 CSS 背景提取、下载队列断点续传</li>
+</ul>
+
+<div class="footer">
+  <p>&copy; <script>document.write(new Date().getFullYear())</script> FastNow Studio | MIT License<br><a href="https://github.com/fastnow/UserJs">GitHub 仓库</a></p>
+</div>
+
+</body>
+</html>
